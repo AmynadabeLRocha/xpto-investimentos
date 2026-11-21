@@ -1,15 +1,19 @@
+import os
 import mysql.connector
+from dotenv import load_dotenv
 from mysql.connector import Error
+
+load_dotenv()
 
 
 def conectar():
-    """Abre e retorna uma conexão com o banco XPTO_Investimentos no MySQL local."""
+    """Abre e retorna uma conexão com o banco XPTO_Investimentos usando variáveis de ambiente."""
     try:
         conexao = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="umdoistres",  
-            database="XPTO_Investimentos",
+            host=os.getenv("DB_HOST", "localhost"),
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", ""),
+            database=os.getenv("DB_NAME", "XPTO_Investimentos"),
         )
         return conexao
     except Error as erro:
