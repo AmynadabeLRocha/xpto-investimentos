@@ -1,51 +1,37 @@
 from models import (
-    Administrador,
     Cliente,
     ContaBancaria,
-    Contato,
     Email,
-    Funcionario,
     Investimento,
     Telefone,
 )
+from repository import ClienteRepository
 
 
-def executar_simulacao():
-    # 1. Instanciando Cliente e seus objetos compostos
-    cliente1 = Cliente("111.222.333-44", "Carlos Mendes", "carlos.mendes", "senha123")
-    cliente1.adicionar_telefone(Telefone("(61) 99999-1111", "Celular"))
-    cliente1.adicionar_email(Email("carlos.mendes@email.com"))
+def executar_integracao():
+    repo = ClienteRepository()
 
-    conta1 = ContaBancaria("Banco do Brasil", "1234-5", "98765-0", 15400.50, "2026-11-21")
-    conta1.depositar(600.00)
-    cliente1.adicionar_conta(conta1)
-
-    cliente1.adicionar_investimento(Investimento("Tesouro Selic", 10000.00))
-    cliente1.adicionar_investimento(Investimento("CDB Liquidez Diária", 5000.00))
-
-    # 2. Instanciando Funcionário, Administrador e registrando Contato
-    consultora = Funcionario(1, "Ana Paula Souza", "ana.souza", "admin456", "Consultora Sênior")
-    admin = Administrador("Roberto Lima", "roberto.admin", "root789")
-
-    atendimento = Contato(
-        cliente=cliente1,
-        funcionario=consultora,
-        forma_contato="Telefone",
-        data_contato="2026-11-20",
-        produto_assunto="Aporte Tesouro Selic",
+    # 1. Instancia uma nova cliente via POO e grava no MySQL
+    nova_cliente = Cliente("999.888.777-66", "Fernanda Costa", "fernanda.costa", "invest2026")
+    nova_cliente.adicionar_telefone(Telefone("(61) 97777-3333", "Celular"))
+    nova_cliente.adicionar_email(Email("fernanda.costa@email.com"))
+    nova_cliente.adicionar_conta(
+        ContaBancaria("Nubank", "0001", "54321-9", 22000.00, "2026-11-21")
     )
+    nova_cliente.adicionar_investimento(Investimento("LCI Banco Inter", 12000.00))
+    nova_cliente.adicionar_investimento(Investimento("Tesouro IPCA+", 6500.00))
 
-    # 3. Exibindo resultados no terminal
-    print("=== XPTO INVESTIMENTOS - TESTE DE DOMÍNIO (POO) ===")
-    print(f"Login Carlos válido? {cliente1.autenticar('senha123')}")
-    print(f"Cliente: {cliente1.nome} | CPF: {cliente1.cpf}")
-    print(f"Contato principal: {cliente1.telefones[0]} | {cliente1.emails[0]}")
-    print(f"Saldo atualizado em conta: R$ {cliente1.contas[0].saldo:,.2f}")
-    print(f"Total investido (Cliente): R$ {cliente1.calcular_patrimonio_investido():,.2f}")
-    print(f"Total sob gestão (Admin {admin.nome}): R$ {admin.gerar_resumo_carteira([cliente1]):,.2f}")
-    print("\n--- Histórico de Atendimento ---")
-    print(atendimento.resumo_atendimento())
+    print("=== XPTO INVESTIMENTOS - INTEGRAÇÃO PYTHON + MYSQL ===")
+    repo.salvar(nova_cliente)
+
+    # 2. Consulta todos os registros gravados no banco (dados do SQL + dados inseridos via Python)
+    print("\n--- Carteira Consolidada no Banco de Dados ---")
+    registros = repo.listar_carteira_geral()
+    for item in registros:
+        valor = f"R$ {item['Valor_Investido']:,.2f}" if item["Valor_Investido"] else "Sem investimentos"
+        produto = item["Tipo_Investimento"] or "-"
+        print(f"Cliente: {item['Nome']} ({item['CPF']}) | Produto: {produto} | Valor: {valor}")
 
 
 if __name__ == "__main__":
-    executar_simulacao()
+    executar_integracao()

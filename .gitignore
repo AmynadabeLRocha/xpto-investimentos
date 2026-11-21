@@ -1,3 +1,4 @@
+# Ambiente virtual, cache Python e variaveis sensiveis
 .venv/
 __pycache__/
 *.pyc
